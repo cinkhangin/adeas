@@ -37,8 +37,8 @@ object Adeas {
 
     private var onCloseRewarded: (() -> Unit)? = null
 
-    private val isRewardedAdLoaded = MutableStateFlow(false)
-    val rewarded = isRewardedAdLoaded.asStateFlow()
+    private val _isRewardedAdLoaded = MutableStateFlow(false)
+    val isRewardedAdLoaded = _isRewardedAdLoaded.asStateFlow()
 
 
     fun createBanner(context: Context): AdView {
@@ -73,7 +73,7 @@ object Adeas {
         mutableState.value = isEnable
     }
 
-    fun load(adType: AdType, context: Context, onRewardedLoaded: () -> Unit = {}) {
+    fun load(adType: AdType, context: Context, onRewardedLoaded: (RewardedAd) -> Unit = {}) {
         val adRequest = AdRequest.Builder().build()
 
         when (adType) {
@@ -83,7 +83,7 @@ object Adeas {
         }
     }
 
-    fun loadAll(context: Context, onRewardedLoaded: () -> Unit = {}) {
+    fun loadAll(context: Context, onRewardedLoaded: (RewardedAd) -> Unit = {}) {
         load(AdType.BANNER, context)
         load(AdType.INTERSTITIAL, context)
         load(AdType.REWARDED, context, onRewardedLoaded)
@@ -116,7 +116,7 @@ object Adeas {
         }
     }
 
-    private fun loadRewarded(adRequest: AdRequest, context: Context, onRewardedLoaded: () -> Unit) {
+    private fun loadRewarded(adRequest: AdRequest, context: Context, onRewardedLoaded: (RewardedAd) -> Unit) {
         if (rewardedAd != null) return
 
         val rewardedAdLoadCallback = object : RewardedAdLoadCallback() {
@@ -124,15 +124,15 @@ object Adeas {
                 super.onAdLoaded(ad)
                 Log.d(TAG, "Ad is loaded")
                 rewardedAd = ad
-                isRewardedAdLoaded.value = true
-                onRewardedLoaded()
+                _isRewardedAdLoaded.value = true
+                onRewardedLoaded(ad)
             }
 
             override fun onAdFailedToLoad(error: LoadAdError) {
                 super.onAdFailedToLoad(error)
                 Log.e(TAG, error.message)
                 rewardedAd = null
-                isRewardedAdLoaded.value = false
+                _isRewardedAdLoaded.value = false
             }
         }
 
