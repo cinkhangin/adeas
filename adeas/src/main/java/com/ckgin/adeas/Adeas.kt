@@ -1,17 +1,15 @@
 @file:Suppress("unused")
 
-package com.naulian.adeas
+package com.ckgin.adeas
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import com.naulian.anhance.PrefStore
-import com.naulian.anhance.logDebug
-import com.naulian.anhance.logError
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -58,18 +56,18 @@ object Adeas {
         adView = AdView(context)
         this.adUnits = adUnits
 
-        isEnable = PrefStore(context).readBoolean(keyEnable, true)
+        //isEnable = PrefStore(context).readBoolean(keyEnable, true)
         mutableState.value = isEnable
     }
 
     fun enableAds(context: Context) {
-        PrefStore(context).writeBoolean(keyEnable, true)
+        //PrefStore(context).writeBoolean(keyEnable, true)
         isEnable = true
         mutableState.value = isEnable
     }
 
     fun disableAds(context: Context) {
-        PrefStore(context).writeBoolean(keyEnable, false)
+        //PrefStore(context).writeBoolean(keyEnable, false)
         isEnable = false
         mutableState.value = isEnable
     }
@@ -95,12 +93,12 @@ object Adeas {
 
         val addLoadCallback = object : InterstitialAdLoadCallback() {
             override fun onAdFailedToLoad(adError: LoadAdError) {
-                logError(TAG, adError.message)
+                Log.e(TAG, adError.message)
                 interstitialAd = null
             }
 
             override fun onAdLoaded(ad: InterstitialAd) {
-                logDebug(TAG, " Ad was loaded ")
+                Log.d(TAG, " Ad was loaded ")
                 interstitialAd = ad
             }
         }
@@ -123,14 +121,14 @@ object Adeas {
         val rewardedAdLoadCallback = object : RewardedAdLoadCallback() {
             override fun onAdLoaded(ad: RewardedAd) {
                 super.onAdLoaded(ad)
-                logDebug(TAG, "Ad is loaded")
+                Log.d(TAG, "Ad is loaded")
                 rewardedAd = ad
                 mutableRewarded.value = true
             }
 
             override fun onAdFailedToLoad(error: LoadAdError) {
                 super.onAdFailedToLoad(error)
-                logError(TAG, error.message)
+                Log.e(TAG, error.message)
                 rewardedAd = null
                 mutableRewarded.value = false
             }
@@ -171,7 +169,7 @@ object Adeas {
                 }
 
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) {
-                    logError(TAG, "${adError.code}: ${adError.message}")
+                    Log.e(TAG, "${adError.code}: ${adError.message}")
                 }
 
                 override fun onAdImpression() {}

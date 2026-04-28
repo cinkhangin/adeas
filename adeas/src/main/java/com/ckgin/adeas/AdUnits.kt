@@ -1,4 +1,4 @@
-package com.naulian.adeas
+package com.ckgin.adeas
 
 data class AdUnits(
     val banner : String = "ca-app-pub-3940256099942544/6300978111",

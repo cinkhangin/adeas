@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.naulian.adeas
+package com.ckgin.adeas
 
 import android.app.Activity
 import android.content.Context
