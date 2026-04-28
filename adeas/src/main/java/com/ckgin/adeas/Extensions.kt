@@ -4,7 +4,6 @@ package com.ckgin.adeas
 
 import android.app.Activity
 import android.content.Context
-import androidx.fragment.app.Fragment
 
 fun initializeAdmob(
     context: Context,
@@ -33,42 +32,34 @@ fun loadAllAds(context: Context) {
     Adeas.loadAll(context)
 }
 
-fun showRewardedAd(activity: Activity, action: (result: Boolean) -> Unit) {
-    Adeas.showRewardedAd(activity, action)
+fun Activity.loadRewardedAd(onRewardedLoaded: () -> Unit = {}) {
+    Adeas.load(AdType.REWARDED, context = this, onRewardedLoaded = onRewardedLoaded)
 }
 
-fun showInterstitialAd(activity: Activity, action: (result: Boolean) -> Unit) {
-    Adeas.showInterstitialAd(activity, action)
+fun Activity.loadInterstitialAd() {
+    Adeas.load(AdType.INTERSTITIAL, context = this)
 }
 
-fun Fragment.loadRewardedAd() {
-    Adeas.load(AdType.REWARDED, requireContext())
+fun Activity.loadBannerAd() {
+    Adeas.load(AdType.BANNER, context = this)
 }
 
-fun Fragment.loadInterstitialAd() {
-    Adeas.load(AdType.INTERSTITIAL, requireContext())
+fun Activity.loadAds(adType: AdType, onRewardedLoaded: () -> Unit = {}) {
+    Adeas.load(adType, context = this, onRewardedLoaded = onRewardedLoaded)
 }
 
-fun Fragment.loadBannerAd() {
-    Adeas.load(AdType.BANNER, requireContext())
+fun Activity.loadAllAds(onRewardedLoaded: () -> Unit = {}) {
+    Adeas.loadAll(context = this, onRewardedLoaded = onRewardedLoaded)
 }
 
-fun Fragment.loadAds(adType: AdType) {
-    Adeas.load(adType, requireContext())
+fun Activity.showRewardedAd(action: (result: Boolean) -> Unit) {
+    Adeas.showRewardedAd(activity = this, action)
 }
 
-fun Fragment.loadAllAds() {
-    Adeas.loadAll(requireContext())
+fun Activity.showInterstitialAd(action: (result: Boolean) -> Unit) {
+    Adeas.showInterstitialAd(activity = this, action)
 }
 
-fun Fragment.showRewardedAd(action: (result: Boolean) -> Unit) {
-    Adeas.showRewardedAd(requireActivity(), action)
-}
-
-fun Fragment.showInterstitialAd(action: (result: Boolean) -> Unit) {
-    Adeas.showInterstitialAd(requireActivity(), action)
-}
-
-fun onClosedRewarded(action: () -> Unit){
+fun onClosedRewarded(action: () -> Unit) {
     Adeas.onClosedRewarded(action)
 }

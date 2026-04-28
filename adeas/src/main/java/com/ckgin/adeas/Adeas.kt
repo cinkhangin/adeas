@@ -37,8 +37,9 @@ object Adeas {
 
     private var onCloseRewarded: (() -> Unit)? = null
 
-    private val mutableRewarded = MutableStateFlow(false)
-    val rewarded = mutableRewarded.asStateFlow()
+    private val isRewardedAdLoaded = MutableStateFlow(false)
+    val rewarded = isRewardedAdLoaded.asStateFlow()
+
 
     fun createBanner(context: Context): AdView {
         return adView ?: AdView(context).apply {
@@ -72,20 +73,20 @@ object Adeas {
         mutableState.value = isEnable
     }
 
-    fun load(adType: AdType, context: Context) {
+    fun load(adType: AdType, context: Context, onRewardedLoaded: () -> Unit = {}) {
         val adRequest = AdRequest.Builder().build()
 
         when (adType) {
-            AdType.REWARDED -> loadRewarded(adRequest, context)
+            AdType.REWARDED -> loadRewarded(adRequest, context, onRewardedLoaded)
             AdType.BANNER -> loadBanner(adRequest, context)
             AdType.INTERSTITIAL -> loadInterstitial(adRequest, context)
         }
     }
 
-    fun loadAll(context: Context) {
+    fun loadAll(context: Context, onRewardedLoaded: () -> Unit = {}) {
         load(AdType.BANNER, context)
         load(AdType.INTERSTITIAL, context)
-        load(AdType.REWARDED, context)
+        load(AdType.REWARDED, context, onRewardedLoaded)
     }
 
     private fun loadInterstitial(adRequest: AdRequest, context: Context) {
@@ -115,7 +116,7 @@ object Adeas {
         }
     }
 
-    private fun loadRewarded(adRequest: AdRequest, context: Context) {
+    private fun loadRewarded(adRequest: AdRequest, context: Context, onRewardedLoaded: () -> Unit) {
         if (rewardedAd != null) return
 
         val rewardedAdLoadCallback = object : RewardedAdLoadCallback() {
@@ -123,14 +124,15 @@ object Adeas {
                 super.onAdLoaded(ad)
                 Log.d(TAG, "Ad is loaded")
                 rewardedAd = ad
-                mutableRewarded.value = true
+                isRewardedAdLoaded.value = true
+                onRewardedLoaded()
             }
 
             override fun onAdFailedToLoad(error: LoadAdError) {
                 super.onAdFailedToLoad(error)
                 Log.e(TAG, error.message)
                 rewardedAd = null
-                mutableRewarded.value = false
+                isRewardedAdLoaded.value = false
             }
         }
 

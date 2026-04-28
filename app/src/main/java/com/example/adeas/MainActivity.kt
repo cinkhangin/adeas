@@ -1,6 +1,7 @@
 package com.example.adeas
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -34,7 +35,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         initializeAdmob(this, debug = true)
-        loadAllAds(this)
+
+        loadAllAds{
+            Log.d("MainActivity", "onCreate: Rewarded Ad Loaded")
+        }
 
         setContent {
             MaterialTheme {
@@ -44,12 +48,12 @@ class MainActivity : ComponentActivity() {
                 ) {
                     MainScreen(
                         onShowInterstitial = {
-                            showInterstitialAd(this) {
+                            showInterstitialAd {
                                 if (!it) showToast("Ad is not ready")
                             }
                         },
                         onShowRewarded = {
-                            showRewardedAd(this) {
+                            showRewardedAd {
                                 if (!it) showToast("Ad is not ready")
                             }
                         },
