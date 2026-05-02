@@ -64,3 +64,7 @@ fun Activity.showInterstitialAd(action: (result: Boolean) -> Unit) {
 fun onClosedRewarded(action: () -> Unit) {
     Adeas.onClosedRewarded(action)
 }
+
+fun setSSVOptions(userId: String = "", customData: String = "") {
+    Adeas.setSSVOptions(userId, customData)
+}

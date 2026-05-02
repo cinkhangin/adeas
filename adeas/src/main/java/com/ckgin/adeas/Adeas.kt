@@ -13,6 +13,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.google.android.gms.ads.rewarded.ServerSideVerificationOptions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -43,24 +44,42 @@ object Adeas {
     private val _isRewardedAdLoaded = MutableStateFlow(false)
     val isRewardedAdLoaded = _isRewardedAdLoaded.asStateFlow()
 
+    private var ssvOptions: ServerSideVerificationOptions? = null
+
+    fun setSSVOptions(userId: String = "", customData: String = "") {
+        val builder = ServerSideVerificationOptions.Builder()
+
+        if(userId.isNotEmpty()){
+            builder.setUserId(userId)
+        }
+
+        if(customData.isNotEmpty()){
+            builder.setCustomData(customData)
+        }
+        val options = builder.build()
+        ssvOptions = options
+        rewardedAd?.setServerSideVerificationOptions(options)
+    }
 
     fun createBanner(context: Context): AdView {
-        return adView ?: AdView(context).apply {
-            val adRequest = AdRequest.Builder().build()
+        adView?.let { return it }
+        val view = AdView(context).apply {
             setAdSize(AdSize.BANNER)
             adUnitId = getAdString(AdType.BANNER)
-            loadAd(adRequest)
+            loadAd(AdRequest.Builder().build())
         }
+        adView = view
+        return view
     }
 
     fun initialize(context: Context, adUnits: AdUnits, isDebugMode: Boolean) {
         MobileAds.initialize(context)
 
         debugMode = isDebugMode
-        adView = AdView(context)
+        adView = null
         this.adUnits = adUnits
 
-        //isEnable = PrefStore(context).readBoolean(keyEnable, true)
+        isEnable = isAdsEnabled(context)
         _isAdsEnabled.value = isEnable
     }
 
@@ -121,6 +140,7 @@ object Adeas {
     }
 
     private fun loadBanner(adRequest: AdRequest, context: Context) {
+        adView?.destroy()
         adView = AdView(context).apply {
             setAdSize(AdSize.BANNER)
             adUnitId = getAdString(AdType.BANNER)
@@ -139,9 +159,10 @@ object Adeas {
             override fun onAdLoaded(ad: RewardedAd) {
                 super.onAdLoaded(ad)
                 Log.d(TAG, "Ad is loaded")
+                ssvOptions?.let { ad.setServerSideVerificationOptions(it) }
+                onRewardedLoaded(ad)
                 rewardedAd = ad
                 _isRewardedAdLoaded.value = true
-                onRewardedLoaded(rewardedAd!!)
             }
 
             override fun onAdFailedToLoad(error: LoadAdError) {
@@ -183,11 +204,15 @@ object Adeas {
                 override fun onAdClicked() {}
 
                 override fun onAdDismissedFullScreenContent() {
+                    rewardedAd = null
                     onCloseRewarded?.invoke()
+                    load(AdType.REWARDED, activity)
                 }
 
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                     Log.e(TAG, "${adError.code}: ${adError.message}")
+                    rewardedAd = null
+                    load(AdType.REWARDED, activity)
                 }
 
                 override fun onAdImpression() {}
@@ -197,8 +222,6 @@ object Adeas {
 
             show(activity) {
                 action(true)
-                rewardedAd = null
-                load(AdType.REWARDED, activity)
             }
         }
     }
@@ -217,6 +240,13 @@ object Adeas {
                 override fun onAdDismissedFullScreenContent() {
                     interstitialAd = null
                     action(true)
+                    load(AdType.INTERSTITIAL, activity)
+                }
+
+                override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                    Log.e(TAG, "${adError.code}: ${adError.message}")
+                    interstitialAd = null
+                    load(AdType.INTERSTITIAL, activity)
                 }
 
                 override fun onAdImpression() {}
@@ -231,6 +261,7 @@ object Adeas {
     }
 
     fun clearAdView() {
+        adView?.destroy()
         adView = null
     }
 }
