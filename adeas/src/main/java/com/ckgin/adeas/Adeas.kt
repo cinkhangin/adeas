@@ -5,6 +5,9 @@ package com.ckgin.adeas
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import com.ckgin.keeper.Keeper
+import com.ckgin.keeper.datastore
 import com.google.android.gms.ads.*
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
@@ -30,10 +33,10 @@ object Adeas {
 
     private var isEnable = true
 
-    private const val keyEnable = "is_enable"
+    private val isAdsEnabledKey = booleanPreferencesKey("is_ads_enabled")
 
-    private val mutableState = MutableStateFlow(true)
-    val state = mutableState.asStateFlow()
+    private val _isAdsEnabled = MutableStateFlow(true)
+    val isAdsEnabled = _isAdsEnabled.asStateFlow()
 
     private var onCloseRewarded: (() -> Unit)? = null
 
@@ -58,19 +61,28 @@ object Adeas {
         this.adUnits = adUnits
 
         //isEnable = PrefStore(context).readBoolean(keyEnable, true)
-        mutableState.value = isEnable
+        _isAdsEnabled.value = isEnable
     }
 
-    fun enableAds(context: Context) {
-        //PrefStore(context).writeBoolean(keyEnable, true)
+    suspend fun enableAds(context: Context) {
+        val keeper = Keeper(context.datastore)
+        keeper.keep(isAdsEnabledKey, true)
+
         isEnable = true
-        mutableState.value = isEnable
+        _isAdsEnabled.value = isEnable
     }
 
-    fun disableAds(context: Context) {
-        //PrefStore(context).writeBoolean(keyEnable, false)
+    suspend fun disableAds(context: Context) {
+        val keeper = Keeper(context.datastore)
+        keeper.keep(isAdsEnabledKey, false)
+
         isEnable = false
-        mutableState.value = isEnable
+        _isAdsEnabled.value = isEnable
+    }
+
+    fun isAdsEnabled(context: Context): Boolean {
+        val keeper = Keeper(context.datastore)
+        return keeper.take(isAdsEnabledKey, true)
     }
 
     fun load(adType: AdType, context: Context, onRewardedLoaded: (RewardedAd) -> Unit = {}) {
@@ -116,7 +128,11 @@ object Adeas {
         }
     }
 
-    private fun loadRewarded(adRequest: AdRequest, context: Context, onRewardedLoaded: (RewardedAd) -> Unit) {
+    private fun loadRewarded(
+        adRequest: AdRequest,
+        context: Context,
+        onRewardedLoaded: (RewardedAd) -> Unit
+    ) {
         if (rewardedAd != null) return
 
         val rewardedAdLoadCallback = object : RewardedAdLoadCallback() {
@@ -125,7 +141,7 @@ object Adeas {
                 Log.d(TAG, "Ad is loaded")
                 rewardedAd = ad
                 _isRewardedAdLoaded.value = true
-                onRewardedLoaded(ad)
+                onRewardedLoaded(rewardedAd!!)
             }
 
             override fun onAdFailedToLoad(error: LoadAdError) {

@@ -39,6 +39,7 @@ dependencies {
     implementation(libs.material)
 
     implementation(libs.anhance)
+    implementation(libs.ckgin.keeper)
     //admob
     implementation(libs.play.services.ads)
 
@@ -58,7 +59,7 @@ mavenPublishing {
     coordinates(
         groupId = "com.ckgin",
         artifactId = "adeas",
-        version = "1.0.0-alpha03"
+        version = "1.0.0-alpha04"
     )
     //./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
 
