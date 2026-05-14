@@ -32,15 +32,16 @@ object Adeas {
 
     private var adView: AdView? = null
 
+    private var onCloseRewarded: (() -> Unit)? = null
+
+    //is_enable
     private var isEnable = true
-
     private val isAdsEnabledKey = booleanPreferencesKey("is_ads_enabled")
-
     private val _isAdsEnabled = MutableStateFlow(true)
     val isAdsEnabled = _isAdsEnabled.asStateFlow()
 
-    private var onCloseRewarded: (() -> Unit)? = null
 
+    // is_ready
     private val _isRewardedAdLoaded = MutableStateFlow(false)
     val isRewardedAdLoaded = _isRewardedAdLoaded.asStateFlow()
 
@@ -155,6 +156,7 @@ object Adeas {
     ) {
         if (rewardedAd != null) return
 
+        _isRewardedAdLoaded.value = false
         val rewardedAdLoadCallback = object : RewardedAdLoadCallback() {
             override fun onAdLoaded(ad: RewardedAd) {
                 super.onAdLoaded(ad)
