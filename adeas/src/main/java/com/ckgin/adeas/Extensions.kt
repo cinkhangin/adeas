@@ -53,8 +53,8 @@ fun Activity.loadAllAds(onRewardedLoaded: (RewardedAd) -> Unit = {}) {
     Adeas.loadAll(context = this, onRewardedLoaded = onRewardedLoaded)
 }
 
-fun Activity.showRewardedAd(action: (result: Boolean) -> Unit) {
-    Adeas.showRewardedAd(activity = this, action)
+fun Activity.showRewardedAd(action: (result: Boolean) -> Unit, loadAfterWatch: Boolean = true) {
+    Adeas.showRewardedAd(activity = this, action =  action, loadAfterWatch)
 }
 
 fun Activity.showInterstitialAd(action: (result: Boolean) -> Unit) {

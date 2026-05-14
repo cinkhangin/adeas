@@ -49,11 +49,11 @@ object Adeas {
     fun setSSVOptions(userId: String = "", customData: String = "") {
         val builder = ServerSideVerificationOptions.Builder()
 
-        if(userId.isNotEmpty()){
+        if (userId.isNotEmpty()) {
             builder.setUserId(userId)
         }
 
-        if(customData.isNotEmpty()){
+        if (customData.isNotEmpty()) {
             builder.setCustomData(customData)
         }
         val options = builder.build()
@@ -191,7 +191,11 @@ object Adeas {
         }
     }
 
-    fun showRewardedAd(activity: Activity, action: (Boolean) -> Unit) {
+    fun showRewardedAd(
+        activity: Activity,
+        action: (Boolean) -> Unit,
+        loadAfterWatch: Boolean = true
+    ) {
         if (!isEnable) return
 
         if (rewardedAd == null) {
@@ -206,7 +210,10 @@ object Adeas {
                 override fun onAdDismissedFullScreenContent() {
                     rewardedAd = null
                     onCloseRewarded?.invoke()
-                    load(AdType.REWARDED, activity)
+
+                    if (loadAfterWatch) {
+                        load(AdType.REWARDED, activity)
+                    }
                 }
 
                 override fun onAdFailedToShowFullScreenContent(adError: AdError) {
